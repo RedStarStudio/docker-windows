@@ -1,3 +1,4 @@
+echo building robotframework...
 cd robotframework
 call build.bat
 cd ..
