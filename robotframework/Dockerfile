@@ -4,10 +4,6 @@
 
 FROM microsoft/windowsservercore:10.0.14393.2665
 
-ARG HTTPS_PROXY
-
-COPY python.msi C:/
-COPY get-pip.py C:/
 COPY requirements.txt C:/ 
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
@@ -18,7 +14,7 @@ ENV PYTHON_RELEASE 2.7.15
 RUN $url = ('https://www.python.org/ftp/python/{0}/python-{1}.msi' -f $env:PYTHON_RELEASE, $env:PYTHON_VERSION); \
 	Write-Host ('Downloading {0} ...' -f $url); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-	#Invoke-WebRequest -Uri $url -OutFile 'python.msi'; \
+	Invoke-WebRequest -Uri $url -OutFile 'python.msi'; \
 	\
 	Write-Host 'Installing ...'; \
 # https://www.python.org/download/releases/2.4/msi/
@@ -34,9 +30,8 @@ RUN $url = ('https://www.python.org/ftp/python/{0}/python-{1}.msi' -f $env:PYTHO
 		); \
 	\
 # the installer updated PATH, so we should refresh our local value
-	$env:PATH = 'C:\mingw32\bin;{0}' -f [Environment]::GetEnvironmentVariable('PATH', [EnvironmentVariableTarget]::Machine); \
+	$env:PATH = [Environment]::GetEnvironmentVariable('PATH', [EnvironmentVariableTarget]::Machine); \
 	$env:PATHEXT = '.DLL;{0}' -f [Environment]::GetEnvironmentVariable('PATHEXT', [EnvironmentVariableTarget]::Machine); \
-	echo $env:PATH; \
 	\
 	Write-Host 'Verifying install ...'; \
 	Write-Host '  python --version'; python --version; \
@@ -51,7 +46,7 @@ ENV PYTHON_PIP_VERSION 18.1
 
 RUN Write-Host ('Installing pip=={0} ...' -f $env:PYTHON_PIP_VERSION); \
 	[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-	#Invoke-WebRequest -Uri 'https://bootstrap.pypa.io/get-pip.py' -OutFile 'get-pip.py'; \
+	Invoke-WebRequest -Uri 'https://bootstrap.pypa.io/get-pip.py' -OutFile 'get-pip.py'; \
 	python get-pip.py \
 		--disable-pip-version-check \
 		--no-cache-dir \
